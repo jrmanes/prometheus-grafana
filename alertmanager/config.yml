@@ -1,0 +1,43 @@
+route:
+     receiver: 'rocketchat'
+     group_by: ['name']
+     group_wait: 10s
+     repeat_interval: 2h
+     routes:
+     - receiver: rocketchat
+       continue: true
+     - receiver: email-me
+       continue: true
+     - receiver: slack
+       continue: true
+     - receiver: executor
+       continue: true
+receivers:
+     - name: 'slack'
+       slack_configs:
+          - send_resolved: true
+            username: 'Prometheus'
+            channel: '#monitoring'
+            api_url: 'https://hooks.slack.com/services/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'
+            color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+            title: '{{ template "slack.default.title" . }}'
+            title_link: '{{ template "slack.default.titlelink" . }}'
+            pretext: 'https://prometheus.localhost {{ template "slack.default.pretext" . }}'
+            text: '{{ template "slack.default.text" . }}'
+            footer: '{{ template "slack.default.footer" . }}'
+            fallback: '{{ template "slack.default.fallback" . }}'
+            callback_id: '{{ template "slack.default.callbackid" . }}'
+            icon_emoji: '{{ template "slack.default.iconemoji" . }}'
+     - name: email-me
+       email_configs:
+       - send_resolved: true
+         to: servers@server.com
+         from: servers@server.com
+         smarthost: smtp.gmail.com:587
+         auth_username: "servers@server.com"
+         auth_identity: "servers@server.com"
+         auth_password: "password"
+     - name: 'rocketchat'
+       webhook_configs:
+          - send_resolved: true
+            url: 'https://rocketchat.com/hooks/6ZKcSe53YyPiWoN9e/apitoken'

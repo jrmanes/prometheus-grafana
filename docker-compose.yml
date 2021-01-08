@@ -1,0 +1,128 @@
+version: '3.1'
+
+volumes:
+    prometheus_data: {}
+    grafana_data: {}
+    grafana_data2: {}
+
+networks:
+  front-tier:
+  back-tier:
+  host:
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.1.0
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention=200h'
+      - '--web.external-url=http://localhost'
+      - '--web.route-prefix=/'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      # block the access from anywhere, access only from localhost
+      - 127.0.0.1:9090:9090 
+      # - 9090:9090
+    links:
+      # - cadvisor:cadvisor
+      # - alertmanagerEmail:alertmanagerEmail
+      - alertmanager:alertmanager
+      # - alertmanagerEmail:alertmanagerEmail
+    depends_on:
+      - alertmanager
+      # - alertmanagerEmail
+    networks:
+      - back-tier
+    restart: always
+################################
+  alertmanager:
+    image: prom/alertmanager
+    ports:
+      - 127.0.0.1:9093:9093
+      # - 9093:9093
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+    networks:
+      - back-tier
+      - host
+    restart: always
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+################################
+  alertmanagerEmail:
+    image: prom/alertmanager
+    ports:
+      - 9094:9093
+      # - 127.0.0.1:9094:9093
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+    networks:
+      - back-tier
+    restart: always
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+################################
+  cadvisor:
+    image: google/cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - 8080:8080
+    networks:
+      - back-tier
+    deploy:
+      mode: global
+################################
+  grafana:
+    image: grafana/grafana
+    user: "104"
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    env_file:
+      - ./grafana/config.monitoring
+    networks:
+      - back-tier
+      - front-tier
+    restart: always
+################################
+  blackbox_exporter:
+      image: prom/blackbox-exporter:v0.10.0
+      ports:
+        - 9115:9115
+      volumes:
+        - ./blackboxexporter/:/etc/blackboxexporter/
+      command:
+        - '--config.file=/etc/blackboxexporter/config.yml'
+      restart: always
+      networks:
+        - back-tier
+################################
+  nginx:
+    image: nginx
+    ports:
+     - 80:80
+     - 443:443
+    volumes:
+      - ./nginx:/etc/nginx/
+    env_file:
+      - ./nginx/nginx.conf
+    networks:
+      - back-tier
+      - front-tier
+    restart: always
+################################

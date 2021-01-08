@@ -1,0 +1,15 @@
+#################################################################
+######################### S E R V E R S #########################
+#################################################################
+- targets: ['redis.local.cloud:9100']
+  labels:
+    env: pro
+    name: RedisSlaveProd
+- targets: ['redis.local.cloud:9100']
+  labels:
+    env: pre
+    name: RedisMasterPre
+- targets: ['redis.local.cloud:9100']
+  labels:
+    env: dev
+    name: RedisSlaveDev

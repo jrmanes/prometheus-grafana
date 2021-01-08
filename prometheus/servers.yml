@@ -1,0 +1,23 @@
+#################################################################
+######################### S E R V E R S ########################
+#################################################################
+- targets: ['server1.local.com:9100']
+  labels:
+    env: dev
+    name: Dev_1
+- targets: ['server2.local.com:9100']
+  labels:
+    env: dev
+    name: Dev_2
+- targets: ['server3.local.com:9100']
+  labels:
+    env: pre
+    name: PR3_3
+- targets: ['server4.local.com:9100']
+  labels:
+    env: pre
+    name: PRE_4
+- targets: ['server5.local.com:9100']
+  labels:
+    env: pro
+    name: PRO_5

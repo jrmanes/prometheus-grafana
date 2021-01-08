@@ -1,0 +1,117 @@
+groups:
+- name: targets
+  rules:
+################ S T A T U S ####################
+  - alert: Server Stopped
+    expr: up == 0
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Servidor => {{ $labels.job }} {{ $labels.instance_name_tag }} down"
+
+################ C P U - S E R V E R S  ####################
+  - alert: CPU Alta!
+    expr: node_load1{servers!="servers"} > 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "CPU high"
+      description: "{{ $labels.job }} of job {{ $labels.job }} is under high load."
+
+  - alert: CPU > 85%
+    expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle",servers!="servers"}[2m])) * 100) > 85
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      description: 'CPU alta {{ $labels.instance_id
+        }} tagged as: {{ $labels.instance_name_tag }}, the utilisation is currently:
+        {{ $value }}%'
+      summary: CPU Alerta
+
+################ C P U  - F R O N T A L E S ####################
+
+  - alert: CPU High!
+    expr: node_load1{servers="servers"} > 1.7
+    for: 15m
+    labels:
+      severity: warning
+    annotations:
+      summary: "CPU Frontales alta"
+      description: "{{ $labels.job }} of job {{ $labels.job }} is under high load."
+
+  - alert: CPU Frontales > 85%
+    expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle",servers="servers"}[2m])) * 100) > 85
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      description: 'CPU alta {{ $labels.instance_id
+        }} tagged as: {{ $labels.instance_name_tag }}, the utilisation is currently:
+        {{ $value }}%'
+      summary: CPU Frontales Alerta
+
+################ C P U  - B A L A N C E A D O R  ####################
+
+  - alert: CPU Balanceador 1 Alta!
+    expr: node_load1{name="Balanceador_1"} * 100 /2 > 85
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "CPU Balanceador 1 alta"
+      description: "{{ $labels.job }} of job {{ $labels.job }} is under high load."
+
+  - alert: CPU Balanceador 1 > 85%
+    expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle",name="Balanceador_1"}[2m])) * 100) > 85
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      description: 'CPU alta {{ $labels.instance_id
+        }} tagged as: {{ $labels.instance_name_tag }}, the utilisation is currently:
+        {{ $value }}%'
+      summary: CPU Balanceador 1 Alerta
+
+################ M E M O R Y ####################
+  - alert: Memory load > 85%
+    expr: (((node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Cached_bytes - node_memory_Buffers_bytes ) / (node_memory_MemTotal_bytes )) * 100) > 85
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Instance {{ $labels.instance }} under high load"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is under high load."
+
+################ H D D ####################
+  - alert: HDD / > 85%
+    expr: ((node_filesystem_size_bytes{mountpoint="/"} - node_filesystem_avail_bytes{mountpoint="/"}) / node_filesystem_size_bytes{mountpoint="/"}) * 100 > 85
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      description: 'HHD / > 85% {{ $labels.instance_id
+        }} tagged as: {{ $labels.instance_name_tag }}, the utilisation is currently:
+        {{ $value }}%'
+      summary: HDD Alerta
+
+################ W E B  S I T E ####################
+  - alert: URL Down!
+    expr: probe_http_status_code != 200
+    for: 15m
+    labels:
+      severity: warning
+    annotations:
+      description: 'URL Down'
+      summary: URL Alerta!!!
+
+  - alert: WebSite Slow...!!
+    expr: probe_duration_seconds > 10
+    for: 60s
+    labels:
+      severity: warning
+    annotations:
+      description: 'URL takes more than 6 seconds to load for at least 45 seconds ago...'
+      summary: Web TOO Slow!!!
