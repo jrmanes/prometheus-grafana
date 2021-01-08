@@ -18,7 +18,7 @@ receivers:
           - send_resolved: true
             username: 'Prometheus'
             channel: '#monitoring'
-            api_url: 'https://hooks.slack.com/services/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'
+            api_url: 'https://hooks.slack.com/services/<token>'
             color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
             title: '{{ template "slack.default.title" . }}'
             title_link: '{{ template "slack.default.titlelink" . }}'
@@ -40,4 +40,4 @@ receivers:
      - name: 'rocketchat'
        webhook_configs:
           - send_resolved: true
-            url: 'https://rocketchat.com/hooks/6ZKcSe53YyPiWoN9e/apitoken'
+            url: 'https://rocketchat.com/hooks/<hook>/apitoken'
