@@ -10,8 +10,6 @@ route:
        continue: true
      - receiver: slack
        continue: true
-     - receiver: executor
-       continue: true
 receivers:
      - name: 'slack'
        slack_configs:
