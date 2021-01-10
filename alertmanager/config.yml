@@ -1,11 +1,11 @@
 route:
-     receiver: 'rocketchat'
+     #receiver: 'rocketchat'
      group_by: ['name']
      group_wait: 10s
      repeat_interval: 2h
      routes:
-     - receiver: rocketchat
-       continue: true
+     #- receiver: rocketchat
+     #  continue: true
      - receiver: email-me
        continue: true
      - receiver: slack
@@ -35,7 +35,7 @@ receivers:
          auth_username: "servers@server.com"
          auth_identity: "servers@server.com"
          auth_password: "password"
-     - name: 'rocketchat'
-       webhook_configs:
-          - send_resolved: true
-            url: 'https://rocketchat.com/hooks/<hook>/apitoken'
+    # - name: 'rocketchat'
+    #   webhook_configs:
+    #      - send_resolved: true
+    #        url: 'https://rocketchat.com/hooks/<hook>/apitoken'
